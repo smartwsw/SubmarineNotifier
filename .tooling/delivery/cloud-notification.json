@@ -1,0 +1,33 @@
+{
+  "timezone": "Asia/Shanghai",
+  "titleTemplate": "潜水艇返航",
+  "bodyTemplate": "",
+  "advance": {
+    "title": "潜水艇返航（即将返航）",
+    "body": "2 艘潜水艇将于 11/12 19:53 前后返航\n· 合并一号 — 11/12 19:53\n· 合并二号 — 11/12 19:53"
+  },
+  "returned": {
+    "title": "潜水艇返航",
+    "body": "2 艘潜水艇已返航\n· 合并一号 — 11/12 19:53\n· 合并二号 — 11/12 19:53",
+    "lines": [
+      {
+        "name": "合并一号",
+        "returnAt": 1794484424
+      },
+      {
+        "name": "合并二号",
+        "returnAt": 1794484434
+      }
+    ]
+  },
+  "advanceLines": [
+    {
+      "name": "合并一号",
+      "returnAt": 1794484424
+    },
+    {
+      "name": "合并二号",
+      "returnAt": 1794484434
+    }
+  ]
+}

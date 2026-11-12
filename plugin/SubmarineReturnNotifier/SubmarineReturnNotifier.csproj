@@ -1,0 +1,22 @@
+<Project Sdk="Dalamud.NET.Sdk/15.0.0">
+  <!-- Dalamud API 15 的 SDK 自带 net10.0-windows / LangVersion 14 / x64，
+       这里只覆盖项目自身需要的属性，避免与 SDK 默认值冲突。 -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>SubmarineReturnNotifier</RootNamespace>
+    <AssemblyName>SubmarineReturnNotifier</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SubmarineReturnNotifier.Core\SubmarineReturnNotifier.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="SubmarineReturnNotifier.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

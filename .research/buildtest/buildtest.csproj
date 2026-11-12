@@ -1,0 +1,5 @@
+<Project Sdk="Dalamud.NET.Sdk/11.2.0">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,28 @@
+name = "submarine-notifier"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 数据库（创建后把 database_id 填进来）
+[[d1_databases]]
+binding = "DB"
+database_name = "submarine-notifier"
+database_id = "3765cc7a-77ae-410d-98a8-f25e8e7bed5c"
+migrations_dir = "migrations"
+
+# 每用户一个 Scheduler Durable Object
+[[durable_objects.bindings]]
+name = "SCHEDULER"
+class_name = "SchedulerDurableObject"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SchedulerDurableObject"]
+
+[vars]
+# 部署后的默认值：只允许 https 推送地址。
+# 本地 `wrangler dev` 由 .dev.vars 覆盖为 dev，并启用 http 白名单。
+ENVIRONMENT = "production"
+
+[observability]
+enabled = true

@@ -1,0 +1,29 @@
+{
+  "Author": "smartwsw",
+  "Name": "Submarine Return Notifier",
+  "Punchline": "潜水艇返航提醒：把返航时间同步到云端，由云端可靠推送。",
+  "Description": "读取当前角色工坊中的潜水艇返航时间并增量同步到自建 Cloudflare Worker，由云端合并通知并通过 Bark / ntfy 推送。不依赖 AutoRetainer，不读取或修改游戏内存。",
+  "InternalName": "SubmarineReturnNotifier",
+  "AssemblyVersion": "1.0.0.0",
+  "TestingAssemblyVersion": "1.0.0.0",
+  "RepoUrl": "",
+  "ApplicableVersion": "any",
+  "DalamudApiLevel": 15,
+  "TestingDalamudApiLevel": 15,
+  "Tags": [
+    "submarine",
+    "notification",
+    "housing",
+    "workshop"
+  ],
+  "CategoryTags": [
+    "utility"
+  ],
+  "LoadRequiredState": 0,
+  "LoadSync": false,
+  "CanUnloadAsync": false,
+  "LoadPriority": 0,
+  "IsTestingExclusive": false,
+  "AcceptsFeedback": true,
+  "IconUrl": ""
+}

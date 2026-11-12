@@ -1,0 +1,24 @@
+# 构建产物（不要提交）
+**/bin/
+**/obj/
+
+# 本地工具链（体积大，按需重新下载）
+.tooling/dotnet/
+.tooling/node/
+.tooling/npm11/
+.tooling/reflect/
+.tooling/**/*.zip
+
+*.log
+
+# 联调产物：本地账号 token 与抓包结果，绝不能提交
+.tooling/delivery/account*.json
+.tooling/delivery/*.jsonl
+
+# 研究草稿
+.research/scratch/
+
+# 例外：插件仓库产物要提交（GitHub Pages / raw 需要它在线）
+!dist/
+!dist/repo/
+!dist/repo/**

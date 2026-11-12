@@ -1,0 +1,5 @@
+# 复制为 .dev.vars 后用于本地开发；.dev.vars 已被 .gitignore 忽略。
+# 生成随机 32 字节 base64 密钥：openssl rand -base64 32
+SECRETS_KEY=REPLACE_WITH_RANDOM_32_BYTES_BASE64
+ENVIRONMENT=dev
+DEV_INSECURE_PUSH_HOSTS=localhost,127.0.0.1
