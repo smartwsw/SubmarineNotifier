@@ -9,8 +9,8 @@
     "RepoUrl": "https://github.com/smartwsw/SubmarineNotifier",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 15,
-    "DownloadLinkInstall": "https://raw.githubusercontent.com/smartwsw/SubmarineNotifier/main/dist/repo/SubmarineReturnNotifier-1.0.0.0.zip",
-    "DownloadLinkUpdate": "https://raw.githubusercontent.com/smartwsw/SubmarineNotifier/main/dist/repo/SubmarineReturnNotifier-1.0.0.0.zip",
+    "DownloadLinkInstall": "https://github.com/smartwsw/SubmarineNotifier/releases/download/v1.0.0.0/SubmarineReturnNotifier-1.0.0.0.zip",
+    "DownloadLinkUpdate": "https://github.com/smartwsw/SubmarineNotifier/releases/download/v1.0.0.0/SubmarineReturnNotifier-1.0.0.0.zip",
     "LoadRequiredState": 0,
     "LoadSync": false,
     "LoadPriority": 0,
@@ -26,6 +26,6 @@
       "utility"
     ],
     "AcceptsFeedback": true,
-    "LastUpdate": 1794488566
+    "LastUpdate": 1794489563
   }
 ]

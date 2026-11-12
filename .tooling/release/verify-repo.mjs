@@ -2,7 +2,8 @@
 //  1. pluginmaster.json 是数组，必填字段齐全且类型正确；
 //  2. DownloadLinkInstall 指向的 zip 真的能下载，且内含 DLL + 清单；
 //  3. zip 内清单的 InternalName / AssemblyVersion 与 pluginmaster 一致
-//     （不一致时 Dalamud 会显示版本号与安装结果不符）。
+//     （不一致时 Dalamud 会显示版本号与安装结果不符）；
+//  4. zip 由 GitHub Release 托管，而不是随仓库提交（避免仓库被二进制撑大）。
 //
 // 用法：
 //   node .tooling/release/verify-repo.mjs --base-url http://127.0.0.1:8901
@@ -124,7 +125,15 @@ try {
   rmSync(dir, { recursive: true, force: true });
 }
 
-// 本地对照：仓库目录里必须真的存在这个 zip
+// zip 不该进 git：它由 GitHub Release 托管，本地只是构建产物
+const zipIsInRepo = /raw\.githubusercontent\.com|\.github\.io/.test(plugin.DownloadLinkInstall ?? '');
+check(
+  'zip 由 Release 托管而不是随仓库提交',
+  !zipIsInRepo,
+  zipIsInRepo ? `DownloadLinkInstall 指向仓库文件：${plugin.DownloadLinkInstall}` : plugin.DownloadLinkInstall,
+);
+
+// 本地对照：这次构建产出的 zip 仍在 dist/repo 下（未提交，仅用于上传 Release）
 const localZip = join(root, 'dist/repo', plugin.DownloadLinkInstall.split('/').pop() ?? '');
 let localExists = false;
 try {
@@ -133,7 +142,7 @@ try {
 } catch {
   localExists = false;
 }
-check('dist/repo 下存在对应 zip', localExists, localZip);
+check('构建产物 zip 存在（待上传 Release）', localExists, localZip);
 
 if (proxy) rmSync(workDir, { recursive: true, force: true });
 

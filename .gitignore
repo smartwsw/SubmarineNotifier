@@ -18,7 +18,6 @@
 # 研究草稿
 .research/scratch/
 
-# 例外：插件仓库产物要提交（GitHub Pages / raw 需要它在线）
-!dist/
-!dist/repo/
-!dist/repo/**
+# 插件仓库：仓库里只提交 pluginmaster.json
+# zip 是二进制产物，走 GitHub Release 资产（gh release create），不进 git
+dist/repo/*.zip

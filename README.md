@@ -121,13 +121,24 @@ curl https://submarine-notifier.<你的子域>.workers.dev/api/v1/health
 
 ### 4.2 安装插件
 
-#### 方式 A：从插件仓库安装（有仓库地址时，推荐）
+#### 方式 A：从插件仓库安装（推荐）
 
 1. `/xlsettings` → **实验性 / Experimental** → **自定义插件仓库 / Custom Plugin Repositories**；
-2. 粘贴仓库地址（以 `pluginmaster.json` 结尾），点 `+` 保存；
+2. 粘贴仓库地址，点 `+` 保存：
+
+   ```
+   https://raw.githubusercontent.com/smartwsw/SubmarineNotifier/main/dist/repo/pluginmaster.json
+   ```
+
 3. `/xlplugins` → 「全部 / All」→ 搜索 *Submarine Return Notifier* → 安装。
 
-之后插件会自动提示更新。
+之后插件会自动提示更新。插件包本身托管在 [Releases](https://github.com/smartwsw/SubmarineNotifier/releases)，不在仓库里。
+
+国内网络下 `raw.githubusercontent.com` 可能被阻断，可改用 jsDelivr 镜像（内容相同）：
+
+   ```
+   https://gcore.jsdelivr.net/gh/smartwsw/SubmarineNotifier@main/dist/repo/pluginmaster.json
+   ```
 
 #### 方式 B：本地目录安装（自己构建或没有仓库地址时）
 
@@ -157,11 +168,17 @@ curl https://submarine-notifier.<你的子域>.workers.dev/api/v1/health
 **维护者发布成插件仓库**（打包、`pluginmaster.json`、托管与发版流程）见 [docs/RELEASE.md](docs/RELEASE.md)：
 
 ```bash
+# 1) 构建 + 生成 pluginmaster.json（zip 的下载链接指向 Release 资产）
 node .tooling/release/build-repo.mjs \
-  --base-url https://raw.githubusercontent.com/<你>/SubmarineNotifier/main/dist/repo \
-  --version 1.0.1.0
+  --release-base https://github.com/smartwsw/SubmarineNotifier/releases/download \
+  --repo-url https://github.com/smartwsw/SubmarineNotifier
 
-node .tooling/release/verify-repo.mjs --base-url http://127.0.0.1:8901 --zip-base http://127.0.0.1:8901
+# 2) 上传 zip 到 Release（不进 git）
+gh release create v1.0.0.0 dist/repo/SubmarineReturnNotifier-1.0.0.0.zip --title v1.0.0.0 --notes "…"
+
+# 3) 校验生产地址
+node .tooling/release/verify-repo.mjs \
+  --base-url https://raw.githubusercontent.com/smartwsw/SubmarineNotifier/main/dist/repo
 ```
 
 ### 4.3 绑定与配置

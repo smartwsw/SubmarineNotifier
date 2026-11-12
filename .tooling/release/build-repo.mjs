@@ -2,18 +2,24 @@
 //
 // 产物目录（默认 dist/repo/）：
 //   pluginmaster.json                     仓库清单，Dalamud 只认这个文件名
-//   SubmarineReturnNotifier-<version>.zip 每个版本一份，不覆盖旧文件
+//   SubmarineReturnNotifier-<version>.zip 待上传到 GitHub Release 的附件（不进 git）
+//
+// 托管分工：
+//   pluginmaster.json → 留在仓库里（raw / Pages 都可）
+//   zip               → GitHub Release 资产，URL 写进清单的 DownloadLinkInstall/Update
+// 这样仓库不会因每次发版多一份二进制而膨胀，且 zip 不受 raw 的缓存与限流影响。
 //
 // 用法：
 //   node .tooling/release/build-repo.mjs \
-//     --base-url https://raw.githubusercontent.com/<你>/<仓库>/main/dist/repo \
-//     --version 1.0.1.0
+//     --release-base https://github.com/<你>/<仓库>/releases/download
+//   然后：
+//     gh release create v<version> dist/repo/SubmarineReturnNotifier-<version>.zip
 //
-//   --base-url  必填。zip 的公网前缀，脚本拼成 DownloadLinkInstall/Update。
-//   --version   可选。省略时用清单里的 AssemblyVersion。
-//   --repo-url  可选。写进 pluginmaster 与清单的 RepoUrl。
-//   --out       输出目录，默认 dist/repo。
-//   --skip-build 不重新构建，直接复用已有的 latest.zip。
+//   --release-base 必填。Release 资产的下载前缀，脚本拼成 <前缀>/v<version>/<zip 名>。
+//   --version      可选。省略时用清单里的 AssemblyVersion；同时决定 Release tag 的写法。
+//   --repo-url     可选。写进 pluginmaster 与清单的 RepoUrl。
+//   --out          输出目录，默认 dist/repo。
+//   --skip-build   不重新构建，直接复用已有的 latest.zip。
 //
 // 注意：Dalamud 判断"有新版本"靠 pluginmaster 里的 AssemblyVersion，
 // 所以每次发版都必须同时更新清单里的 AssemblyVersion 和这里的 --version。
@@ -36,13 +42,15 @@ function arg(name, fallback = undefined) {
 }
 const flag = (name) => process.argv.includes(`--${name}`);
 
-const baseUrl = arg('base-url')?.replace(/\/+$/, '');
-if (!baseUrl) {
-  console.error('缺少 --base-url（zip 的公网前缀，例如 https://raw.githubusercontent.com/<user>/<repo>/main/dist/repo）');
+const releaseBase = arg('release-base')?.replace(/\/+$/, '');
+if (!releaseBase) {
+  console.error(
+    '缺少 --release-base（Release 资产前缀，例如 https://github.com/<user>/<repo>/releases/download）',
+  );
   process.exit(2);
 }
-if (!/^https:\/\//.test(baseUrl)) {
-  console.error(`--base-url 必须是 https：${baseUrl}`);
+if (!/^https:\/\//.test(releaseBase)) {
+  console.error(`--release-base 必须是 https：${releaseBase}`);
   process.exit(2);
 }
 
@@ -122,8 +130,8 @@ const entry = {
   RepoUrl: repoUrl,
   ApplicableVersion: manifest.ApplicableVersion ?? 'any',
   DalamudApiLevel: manifest.DalamudApiLevel,
-  DownloadLinkInstall: `${baseUrl}/${zipName}`,
-  DownloadLinkUpdate: `${baseUrl}/${zipName}`,
+  DownloadLinkInstall: `${releaseBase}/v${version}/${zipName}`,
+  DownloadLinkUpdate: `${releaseBase}/v${version}/${zipName}`,
   LoadRequiredState: manifest.LoadRequiredState ?? 0,
   LoadSync: manifest.LoadSync ?? false,
   LoadPriority: manifest.LoadPriority ?? 0,
@@ -149,3 +157,6 @@ console.log(`  Version       ${entry.AssemblyVersion}`);
 console.log(`  API Level     ${entry.DalamudApiLevel}`);
 console.log(`  Download      ${entry.DownloadLinkInstall}`);
 if (!repoUrl) console.log('\n提示：RepoUrl 为空。用 --repo-url 填入插件源码地址（显示在插件详情页）。');
+
+console.log(`\n下一步：把 zip 上传成 Release 资产（不要提交进 git）：`);
+console.log(`  gh release create v${version} ${zipTarget} --title "v${version}" --notes "…"`);
