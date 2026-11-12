@@ -7,6 +7,9 @@
 // 用法：
 //   node .tooling/release/verify-repo.mjs --base-url http://127.0.0.1:8901
 //   node .tooling/release/verify-repo.mjs --base-url https://raw.githubusercontent.com/<user>/<repo>/main/dist/repo
+//
+// 需要走 HTTP 代理时加 --proxy http://127.0.0.1:10809：
+// Node 的 fetch 不读 HTTP_PROXY / HTTPS_PROXY，加代理只能自己接管连接，这里改用 curl。
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -26,17 +29,48 @@ if (!baseUrl) {
   process.exit(2);
 }
 
+const proxy = arg('proxy');
+const workDir = mkdtempSync(join(tmpdir(), 'subrepo-verify-'));
+let downloadSeq = 0;
+
+// 统一返回 {ok, status, bytes}，代理与非代理两条路径行为一致
+async function download(url) {
+  if (!proxy) {
+    try {
+      const res = await fetch(url);
+      return { ok: res.ok, status: res.status, bytes: Buffer.from(await res.arrayBuffer()) };
+    } catch (error) {
+      return { ok: false, status: 0, bytes: Buffer.alloc(0), error: error.cause?.message ?? error.message };
+    }
+  }
+  const out = join(workDir, `dl-${++downloadSeq}`);
+  let status;
+  try {
+    status = Number(
+      execFileSync('curl', ['-sSL', '-m', '180', '-x', proxy, '-o', out, '-w', '%{http_code}', url], {
+        encoding: 'utf8',
+      }).trim(),
+    );
+  } catch (error) {
+    return { ok: false, status: 0, bytes: Buffer.alloc(0), error: error.message };
+  }
+  const bytes = readFileSync(out);
+  return { ok: status >= 200 && status < 300, status, bytes };
+}
+
 let failures = 0;
 const check = (name, cond, detail) => {
   console.log(`${cond ? 'PASS' : 'FAIL'}  ${name}${detail ? '  — ' + detail : ''}`);
   if (!cond) failures += 1;
 };
 
-const res = await fetch(`${baseUrl}/pluginmaster.json`);
-check('pluginmaster.json 可访问', res.ok, `HTTP ${res.status}`);
-if (!res.ok) process.exit(1);
+if (proxy) console.log(`      经代理访问：${proxy}\n`);
 
-const master = await res.json();
+const manifest = await download(`${baseUrl}/pluginmaster.json`);
+check('pluginmaster.json 可访问', manifest.ok, manifest.error ?? `HTTP ${manifest.status}`);
+if (!manifest.ok) process.exit(1);
+
+const master = JSON.parse(manifest.bytes.toString('utf8'));
 check('清单是数组（Dalamud 只认数组）', Array.isArray(master), typeof master);
 const plugin = master[0];
 if (!plugin) {
@@ -64,11 +98,11 @@ const zipUrl = zipBase
   : plugin.DownloadLinkInstall;
 if (zipBase) console.log(`      下载改用本地前缀：${zipUrl}`);
 
-const zipRes = await fetch(zipUrl);
-check('zip 可下载', zipRes.ok, `HTTP ${zipRes.status}`);
+const zipRes = await download(zipUrl);
+check('zip 可下载', zipRes.ok, zipRes.error ?? `HTTP ${zipRes.status}`);
 if (!zipRes.ok) process.exit(1);
 
-const bytes = Buffer.from(await zipRes.arrayBuffer());
+const bytes = zipRes.bytes;
 check('zip 非空', bytes.length > 1024, `${bytes.length} bytes`);
 
 const dir = mkdtempSync(join(tmpdir(), 'subrepo-'));
@@ -100,6 +134,8 @@ try {
   localExists = false;
 }
 check('dist/repo 下存在对应 zip', localExists, localZip);
+
+if (proxy) rmSync(workDir, { recursive: true, force: true });
 
 console.log(failures === 0 ? '\n全部通过' : `\n${failures} 项失败`);
 process.exit(failures === 0 ? 0 : 1);

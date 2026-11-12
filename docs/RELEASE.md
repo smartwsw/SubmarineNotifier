@@ -67,6 +67,8 @@ node .tooling/release/build-repo.mjs \
 | `--dotnet` | — | dotnet 可执行文件，默认取 `DOTNET` 环境变量或 `dotnet` |
 | `--skip-build` | — | 复用已有的 `latest.zip`，不重新构建 |
 
+`verify-repo.mjs` 的 `--proxy` 参数见下一节。
+
 脚本会先做三项校验，任一不通过就退出（在此之前不会产生任何产物）：
 
 1. `Author` 不是占位值（不能等于 `InternalName`）；
@@ -105,6 +107,22 @@ node .tooling/release/verify-repo.mjs --base-url http://127.0.0.1:8901 --zip-bas
 
 `--zip-base` 只影响"下载 zip"这一步，用于本地联调时把生产 URL 换成本地地址；
 不带它时脚本按 `pluginmaster.json` 里的真实 URL 下载，也就是发版后的最终校验方式。
+
+直接校验生产地址（推荐发版后立刻跑一次）：
+
+```bash
+node .tooling/release/verify-repo.mjs \
+  --base-url https://raw.githubusercontent.com/smartwsw/SubmarineNotifier/main/dist/repo
+```
+
+> **需要代理时加 `--proxy`**：Node 的 `fetch` 不读 `HTTP_PROXY` / `HTTPS_PROXY` 环境变量，
+> 只设环境变量会得到 `ECONNRESET`。脚本用 curl 接管连接：
+>
+> ```bash
+> node .tooling/release/verify-repo.mjs \
+>   --base-url https://raw.githubusercontent.com/smartwsw/SubmarineNotifier/main/dist/repo \
+>   --proxy http://127.0.0.1:10809
+> ```
 
 全部 PASS 后再进入下一步。
 
